@@ -1,0 +1,911 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>M4 SHOP</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+:root{
+  --bg:#06060a; --text:#eaeaf2; --muted:#7a7a90;
+  --cyan:#00d4ff; --purple:#a855f7; --gold:#ffb800;
+  --green:#10b981; --red:#ef4444;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden}
+body{
+  font-family:'Vazirmatn',Tahoma,sans-serif; color:var(--text);
+  background:#06060a; min-height:100vh; position:relative;
+}
+
+/* ============ Background ============ */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;width:100%;height:100%}
+.aurora{position:fixed;inset:-15%;z-index:0;pointer-events:none;
+  opacity:.55;will-change:transform;animation:auroraShift 30s ease-in-out infinite alternate}
+.aurora::before,.aurora::after{content:'';position:absolute;border-radius:50%}
+.aurora::before{width:60vmax;height:60vmax;left:5%;top:5%;
+  background:radial-gradient(circle,rgba(0,212,255,.5) 0%,rgba(0,212,255,.15) 30%,transparent 60%);
+  filter:blur(20px)}
+.aurora::after{width:70vmax;height:70vmax;right:5%;bottom:5%;
+  background:radial-gradient(circle,rgba(168,85,247,.4) 0%,rgba(168,85,247,.12) 30%,transparent 60%);
+  filter:blur(20px)}
+@keyframes auroraShift{
+  0%{transform:translate(0,0) rotate(0)}
+  50%{transform:translate(3%,-2%) rotate(4deg)}
+  100%{transform:translate(-2%,3%) rotate(-4deg)}
+}
+.grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.014) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.014) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%);
+  -webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 80%)}
+.vignette{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 30%,rgba(6,6,10,.7) 100%)}
+
+/* ============ Header ============ */
+.topbar{position:fixed;top:0;right:0;left:0;z-index:50;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 20px;
+  background:linear-gradient(180deg,rgba(6,6,10,.7) 0%,rgba(6,6,10,0) 100%)}
+.logo{font-weight:900;font-size:1.5rem;letter-spacing:2.5px;direction:ltr;
+  color:#fff;user-select:none;text-shadow:0 0 24px rgba(0,212,255,.5);
+  transition:filter .3s}
+.logo:hover{filter:brightness(1.2)}
+.logo span{background:linear-gradient(135deg,var(--cyan),var(--purple));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* Power toggle (center) */
+.power-slot{flex:1;display:flex;justify-content:center;align-items:center;min-height:38px}
+.power-toggle{position:relative;width:58px;height:32px;border-radius:999px;
+  cursor:pointer;transition:background .35s,box-shadow .35s,transform .15s;
+  background:#2a2a35;box-shadow:inset 0 2px 6px rgba(0,0,0,.6);
+  user-select:none;-webkit-tap-highlight-color:transparent}
+.power-toggle:hover{transform:scale(1.05)}
+.power-toggle:active{transform:scale(.95)}
+.power-toggle.on{background:var(--green);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.25),0 0 24px rgba(16,185,129,.5),
+    0 0 48px rgba(16,185,129,.2)}
+.power-toggle.off{background:var(--red);
+  box-shadow:inset 0 2px 6px rgba(0,0,0,.3),0 0 24px rgba(239,68,68,.4),
+    0 0 48px rgba(239,68,68,.15)}
+.power-ball{position:absolute;top:4px;left:4px;width:24px;height:24px;
+  border-radius:50%;background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.4),inset 0 -2px 3px rgba(0,0,0,.1);
+  transition:left .35s cubic-bezier(.34,1.56,.64,1),transform .2s}
+.power-toggle.on .power-ball{left:calc(100% - 28px)}
+.power-toggle:active .power-ball{transform:scale(.9)}
+
+/* Status */
+.status{display:flex;align-items:center;gap:8px;padding:6px 13px;
+  border-radius:999px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+  font-size:.78rem;color:var(--muted);transition:.3s;white-space:nowrap;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.status .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 8px currentColor;animation:pulse 1.5s infinite}
+.status.online{color:var(--green);border-color:rgba(16,185,129,.3)}
+.status.online .dot{background:var(--green)}
+.status.offline{color:var(--red);border-color:rgba(239,68,68,.3)}
+.status.offline .dot{background:var(--red);animation:none}
+@keyframes pulse{50%{opacity:.3}}
+
+/* ============ Main ============ */
+.container{position:relative;z-index:1;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:100px 16px 80px}
+.shop-card{width:100%;max-width:560px;
+  background:linear-gradient(180deg,rgba(20,20,32,.55),rgba(12,12,20,.75));
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:26px;padding:36px 32px 40px;
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.6),
+    0 1px 0 rgba(255,255,255,.06) inset,
+    0 0 60px rgba(0,212,255,.06);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  animation:rise .8s cubic-bezier(.2,.8,.2,1);
+  position:relative;overflow:hidden}
+.shop-card::before{content:'';position:absolute;top:0;left:-40%;right:-40%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,.6),rgba(168,85,247,.6),transparent);
+  animation:scanline 4s ease-in-out infinite}
+@keyframes scanline{0%,100%{transform:translateX(-30%);opacity:.4}50%{transform:translateX(30%);opacity:1}}
+@keyframes rise{from{opacity:0;transform:translateY(30px) scale(.98)}to{opacity:1;transform:none}}
+
+/* Rate */
+.rate{text-align:center;font-size:1.05rem;color:#c0c0d0;
+  margin-bottom:32px;letter-spacing:.3px}
+.rate b{color:var(--gold);font-weight:800;
+  text-shadow:0 0 20px rgba(255,184,0,.4)}
+
+/* Slider */
+.slider-wrap{width:100%;margin-bottom:24px;position:relative}
+.slider{position:relative;height:80px;direction:ltr;
+  touch-action:none;user-select:none;cursor:pointer;
+  padding:0 8px}
+.track{position:absolute;left:8px;right:8px;top:32px;height:5px;
+  background:rgba(255,255,255,.06);border-radius:3px;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.5)}
+.fill{position:absolute;left:8px;top:32px;height:5px;
+  background:linear-gradient(90deg,var(--cyan),#5ac8fa,var(--purple));
+  border-radius:3px;width:0%;transition:width .3s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 0 16px rgba(0,212,255,.6)}
+.fill::after{content:'';position:absolute;right:-2px;top:50%;
+  width:9px;height:9px;border-radius:50%;background:#fff;
+  transform:translateY(-50%);box-shadow:0 0 12px var(--cyan)}
+.ball{position:absolute;top:34px;transform:translate(-50%,-50%);
+  display:flex;flex-direction:column;align-items:center;
+  z-index:2;transition:left .3s cubic-bezier(.2,.8,.2,1)}
+.ball .circle{width:18px;height:18px;border-radius:50%;
+  background:#0e0e16;border:2px solid rgba(255,255,255,.18);
+  transition:all .28s ease}
+.ball .label{position:absolute;top:26px;font-size:.8rem;font-weight:700;
+  color:#6a6a80;white-space:nowrap;direction:ltr;
+  transition:color .25s,font-size .25s;pointer-events:none}
+.ball.filled .circle{background:var(--cyan);border-color:var(--cyan);
+  box-shadow:0 0 12px rgba(0,212,255,.5)}
+.ball.filled .label{color:#a8a8bc}
+.ball.active .circle{background:#fff;border-color:var(--cyan);
+  box-shadow:0 0 22px var(--cyan),0 0 44px rgba(0,212,255,.4);
+  transform:scale(1.4)}
+.ball.active .label{color:var(--cyan);font-size:.88rem;font-weight:800}
+
+/* Total price */
+.total{text-align:center;margin-bottom:22px;padding:14px 20px;
+  border-radius:14px;background:rgba(255,184,0,.06);
+  border:1px solid rgba(255,184,0,.15);
+  transition:.3s}
+.total .label{font-size:.86rem;color:var(--muted);display:block;margin-bottom:4px}
+.total .value{font-size:2rem;font-weight:900;color:var(--gold);
+  direction:ltr;display:inline-block;
+  text-shadow:0 0 20px rgba(255,184,0,.35);
+  transition:transform .2s}
+.total .value.bump{transform:scale(1.15)}
+.total .unit{color:var(--gold);font-size:.9rem;font-weight:700;margin-inline-start:6px}
+
+/* Buy */
+.buy{width:100%;font-family:inherit;font-size:1.15rem;font-weight:800;
+  padding:18px;border:none;border-radius:15px;color:#06060a;
+  background:linear-gradient(135deg,var(--cyan) 0%,#5ac8fa 30%,var(--purple) 100%);
+  cursor:pointer;user-select:none;
+  box-shadow:0 12px 34px rgba(0,212,255,.3),0 4px 10px rgba(168,85,247,.2),
+    inset 0 0 0 1px rgba(255,255,255,.15);
+  transition:transform .18s,box-shadow .25s,background .3s,color .3s;
+  position:relative;overflow:hidden;letter-spacing:.5px}
+.buy::before{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);
+  transform:skewX(-22deg);animation:shine 4s ease-in-out infinite}
+.buy:hover{transform:translateY(-2px);
+  box-shadow:0 18px 46px rgba(0,212,255,.45),0 6px 16px rgba(168,85,247,.3)}
+.buy:active{transform:translateY(0) scale(.98)}
+.buy.closed{background:linear-gradient(135deg,#2a2a35,#1a1a22);
+  color:#5a5a6a;box-shadow:0 8px 20px rgba(0,0,0,.4);cursor:not-allowed}
+.buy.closed::before{display:none}
+@keyframes shine{0%,65%{left:-60%}100%{left:130%}}
+
+/* ============ Footer ============ */
+.foot{position:fixed;bottom:12px;left:14px;z-index:40;
+  display:flex;align-items:center;gap:6px;
+  font-size:.68rem;letter-spacing:2px;color:rgba(255,255,255,.14);
+  direction:ltr;user-select:none;font-family:monospace;
+  padding:5px 10px;border-radius:8px;
+  background:rgba(255,255,255,.015);border:1px solid transparent;
+  transition:.3s}
+.foot:hover{color:rgba(255,255,255,.4);background:rgba(255,255,255,.04);
+  border-color:rgba(255,255,255,.08)}
+.foot .copy-btn{background:none;border:none;color:inherit;cursor:pointer;
+  font-size:.85rem;padding:0 2px;opacity:.6;transition:opacity .2s}
+.foot .copy-btn:hover{opacity:1}
+.foot .copy-btn.copied{color:var(--green);opacity:1}
+
+/* Admin button */
+.admin-btn{position:fixed;bottom:14px;right:14px;z-index:45;
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(255,184,0,.25),rgba(255,184,0,.08));
+  border:1.5px solid rgba(255,184,0,.5);color:var(--gold);font-size:1.25rem;
+  cursor:pointer;display:none;align-items:center;justify-content:center;
+  transition:transform .2s,box-shadow .2s;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.admin-btn:hover{transform:scale(1.1);box-shadow:0 0 24px rgba(255,184,0,.4)}
+.admin-btn:active{transform:scale(.95)}
+
+/* Admin badge next to logo */
+.admin-badge{position:fixed;top:60px;right:22px;z-index:49;
+  font-size:.72rem;padding:4px 10px;border-radius:999px;
+  background:rgba(255,184,0,.12);border:1px solid rgba(255,184,0,.4);
+  color:var(--gold);font-weight:700;display:none;
+  animation:badgeIn .4s ease}
+.admin-badge.show{display:block}
+@keyframes badgeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+/* ============ Modals ============ */
+.modal{position:fixed;inset:0;z-index:100;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(4,4,8,.8);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  padding:18px;animation:fadeIn .2s ease}
+.modal.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-box{width:100%;max-width:440px;
+  background:linear-gradient(180deg,#14141f,#0a0a12);
+  border:1px solid rgba(255,255,255,.1);border-radius:22px;
+  padding:28px 24px;position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,.8),0 0 60px rgba(0,212,255,.05);
+  animation:modalIn .35s cubic-bezier(.2,.8,.2,1);
+  max-height:88vh;overflow-y:auto}
+@keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(14px)}to{opacity:1;transform:none}}
+.modal-close{position:absolute;top:14px;left:14px;width:32px;height:32px;
+  border-radius:50%;background:rgba(255,255,255,.05);border:none;
+  color:var(--muted);font-size:1rem;cursor:pointer;transition:.2s;
+  display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:rgba(255,255,255,.1);color:#fff}
+.modal-box h2{font-size:1.35rem;color:#fff;margin-bottom:18px;
+  font-weight:800;text-align:center}
+.modal-box p{color:#a8a8bc;font-size:.94rem;line-height:1.7;margin-bottom:14px;text-align:center}
+.pay-amount{text-align:center;font-size:1.9rem;font-weight:900;
+  color:var(--gold);margin:18px 0 24px;padding:16px;
+  background:linear-gradient(180deg,rgba(255,184,0,.1),rgba(255,184,0,.03));
+  border:1px solid rgba(255,184,0,.25);
+  border-radius:14px;
+  text-shadow:0 0 24px rgba(255,184,0,.4)}
+.info-box{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;
+  transition:border-color .2s}
+.info-box:hover{border-color:rgba(0,212,255,.25)}
+.info-box .info-label{font-size:.8rem;color:var(--muted);margin-bottom:8px}
+.info-box .info-value{font-size:1.15rem;font-weight:800;color:#fff;
+  letter-spacing:1.5px;font-family:monospace;
+  user-select:all;cursor:pointer;transition:color .2s}
+.info-box .info-value:hover{color:var(--cyan)}
+.info-box .info-value.ltr{direction:ltr}
+.info-box .info-sub{font-size:.82rem;color:var(--cyan);margin-top:6px}
+.modal-btn{width:100%;font-family:inherit;font-size:1rem;font-weight:800;
+  padding:14px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  color:#06060a;cursor:pointer;margin-top:10px;
+  transition:transform .15s,box-shadow .2s}
+.modal-btn:hover{transform:translateY(-1px);
+  box-shadow:0 8px 24px rgba(0,212,255,.35)}
+.modal-btn:active{transform:translateY(0) scale(.98)}
+.admin-add-row{display:flex;gap:8px;margin-bottom:18px}
+.admin-add-row input{flex:1;font-family:monospace;font-size:1.1rem;
+  padding:12px 14px;border-radius:10px;
+  background:rgba(255,255,255,.04);
+  border:1.5px solid rgba(255,255,255,.1);color:#fff;outline:none;
+  text-transform:uppercase;letter-spacing:4px;text-align:center;
+  transition:border-color .2s}
+.admin-add-row input:focus{border-color:rgba(0,212,255,.5);
+  box-shadow:0 0 0 3px rgba(0,212,255,.1)}
+.admin-add-row .modal-btn{width:auto;margin-top:0;padding:12px 20px;font-size:.92rem}
+.admin-list{display:flex;flex-direction:column;gap:8px;
+  max-height:280px;overflow-y:auto;padding-inline-end:4px}
+.admin-item{display:flex;justify-content:space-between;align-items:center;
+  padding:11px 14px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);border-radius:10px;
+  font-family:monospace;font-size:.95rem;color:#fff;letter-spacing:1.5px}
+.admin-item .remove-admin{font-family:inherit;font-size:.78rem;
+  padding:5px 12px;border-radius:6px;background:rgba(239,68,68,.15);
+  border:1px solid rgba(239,68,68,.3);color:var(--red);cursor:pointer;transition:.2s}
+.admin-item .remove-admin:hover{background:rgba(239,68,68,.3)}
+
+/* ============ Toast ============ */
+.toast{position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(20px);z-index:200;
+  padding:13px 24px;border-radius:14px;
+  background:rgba(15,15,24,.97);
+  border:1px solid rgba(255,255,255,.15);color:#fff;
+  font-size:.94rem;font-weight:600;
+  box-shadow:0 12px 40px rgba(0,0,0,.7);
+  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;
+  max-width:90vw;text-align:center;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.good{border-color:rgba(16,185,129,.5);color:#6ee7b7}
+.toast.bad{border-color:rgba(239,68,68,.5);color:#fca5a5}
+
+/* ============ Responsive ============ */
+@media(max-width:640px){
+  .topbar{padding:12px 14px}
+  .logo{font-size:1.25rem}
+  .status{font-size:.72rem;padding:5px 10px}
+  .container{padding:88px 12px 60px}
+  .shop-card{padding:28px 20px 32px;border-radius:22px}
+  .total .value{font-size:1.7rem}
+  .buy{padding:16px;font-size:1.05rem}
+  .modal-box{padding:24px 18px}
+  .pay-amount{font-size:1.5rem}
+  .admin-badge{top:52px;right:14px;font-size:.65rem}
+}
+@media(max-width:400px){
+  .ball .label{font-size:.72rem}
+  .ball.active .label{font-size:.8rem}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="aurora"></div>
+<div class="grid"></div>
+<div class="vignette"></div>
+
+<!-- ============ HEADER ============ -->
+<header class="topbar">
+  <div class="logo">M4 <span>SHOP</span></div>
+  <div class="power-slot" id="powerSlot" style="display:none">
+    <div class="power-toggle on" id="powerToggle" title="روشن/خاموش شاپ">
+      <div class="power-ball"></div>
+    </div>
+  </div>
+  <div class="status" id="status">
+    <span class="dot"></span>
+    <span id="statusTxt">اتصال…</span>
+  </div>
+</header>
+<div class="admin-badge" id="adminBadge">👑 مدیر</div>
+
+<!-- ============ MAIN ============ -->
+<main class="container">
+  <div class="shop-card">
+    <div class="rate">هر <b>100K</b> = <b>۲۰</b> هزار تومن</div>
+
+    <div class="slider-wrap">
+      <div class="slider" id="slider">
+        <div class="track"></div>
+        <div class="fill" id="fill"></div>
+        <div class="ball" style="left:8px" data-val="100">
+          <div class="circle"></div><div class="label">100K</div>
+        </div>
+        <div class="ball" style="left:calc(25% + 4px)" data-val="200">
+          <div class="circle"></div><div class="label">200K</div>
+        </div>
+        <div class="ball" style="left:calc(50% + 0px)" data-val="300">
+          <div class="circle"></div><div class="label">300K</div>
+        </div>
+        <div class="ball" style="left:calc(75% - 4px)" data-val="400">
+          <div class="circle"></div><div class="label">400K</div>
+        </div>
+        <div class="ball" style="left:calc(100% - 8px)" data-val="500">
+          <div class="circle"></div><div class="label">500K</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="total">
+      <span class="label">مبلغ قابل پرداخت</span>
+      <span class="value" id="totalPrice">۰</span>
+      <span class="unit">تومان</span>
+    </div>
+
+    <button class="buy" id="buyBtn">خرید</button>
+  </div>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<div class="foot" id="foot">
+  <span id="uid">----</span>
+  <button class="copy-btn" id="copyBtn" title="کپی شناسه">📋</button>
+</div>
+<button class="admin-btn" id="adminBtn" style="display:none">👑</button>
+
+<!-- ============ PAY MODAL ============ -->
+<div class="modal" id="payModal">
+  <div class="modal-box">
+    <button class="modal-close" id="payModalClose">✕</button>
+    <h2>💳 پرداخت سفارش</h2>
+    <div class="pay-amount" id="payAmount">۲۰,۰۰۰ تومان</div>
+    <p>مبلغ را به کارت زیر واریز کنید:</p>
+    <div class="info-box">
+      <div class="info-label">شماره کارت</div>
+      <div class="info-value ltr" id="cardNum">6393 4610 6888 0224</div>
+      <div class="info-sub">به نام خادمی</div>
+    </div>
+    <p>سپس اسکرین‌شات را به آیدی زیر در روبیکا بفرستید:</p>
+    <div class="info-box">
+      <div class="info-label">آیدی روبیکا</div>
+      <div class="info-value ltr">@M4_AMOOAMIR</div>
+    </div>
+    <button class="modal-btn" id="payModalOk">متوجه شدم</button>
+  </div>
+</div>
+
+<!-- ============ ADMIN MODAL ============ -->
+<div class="modal" id="adminModal">
+  <div class="modal-box">
+    <button class="modal-close" id="adminModalClose">✕</button>
+    <h2>👑 مدیریت مدیران</h2>
+    <p>شناسه ۴ کاراکتری فرد مورد نظر را وارد کنید:</p>
+    <div class="admin-add-row">
+      <input type="text" id="adminIdInput" maxlength="4" placeholder="XXXX" autocomplete="off">
+      <button class="modal-btn" id="adminAddBtn">مدیر کن</button>
+    </div>
+    <div class="admin-list" id="adminList"></div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   M4 SHOP — v3 (bulletproof admin sync)
+   ================================================================ */
+const MQ_SRC = [
+  'https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js',
+  'https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js'
+];
+const BRK = [
+  'wss://broker.emqx.io:8084/mqtt',
+  'wss://broker.hivemq.com:8884/mqtt',
+  'wss://mqtt.eclipseprojects.io:443/mqtt',
+  'ws://broker.emqx.io:8083/mqtt',
+  'ws://test.mosquitto.org:8080/mqtt'
+];
+const NS = 'm4shop/IR/v3';  // bumped version to clear old retained
+const T_ADMINS   = NS + '/admins';
+const T_POWER    = NS + '/power';
+const T_PRESENCE = NS + '/presence';
+const SUPER_ADMIN = 'U8ER';
+const HEART_MS = 5000;
+const STALE_MS = 15000;
+const REPUBLISH_MS = 8000;
+const UI_POLL_MS = 2000;
+
+/* -------- Helpers -------- */
+const $ = id => document.getElementById(id);
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function persianNum(n){return Number(n).toLocaleString('fa-IR');}
+
+/* -------- UID -------- */
+function getUID(){
+  let id = localStorage.getItem('m4_uid');
+  if (id && /^[A-Z0-9]{4}$/.test(id)) return id;
+  const url = new URL(window.location.href);
+  if (url.searchParams.get('setup') === '1') {
+    localStorage.setItem('m4_uid', SUPER_ADMIN);
+    url.searchParams.delete('setup');
+    window.history.replaceState({}, '', url.toString());
+    return SUPER_ADMIN;
+  }
+  const alpha = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  id = '';
+  for (let i = 0; i < 4; i++) id += alpha[Math.floor(Math.random()*alpha.length)];
+  localStorage.setItem('m4_uid', id);
+  return id;
+}
+const UID = getUID();
+$('uid').textContent = UID;
+
+/* -------- State -------- */
+let adminList = new Set([SUPER_ADMIN]);
+let adminsTs = 0;
+let shopOn = true;
+let powerTs = 0;
+let powerOwner = '';
+let selectedAmount = null;
+const AMOUNTS = [100,200,300,400,500];
+
+function isSuper(){ return UID === SUPER_ADMIN; }
+function isAdmin(){ return isSuper() || adminList.has(UID); }
+
+/* -------- Toast -------- */
+let toastTimer = null;
+function showToast(msg, type){
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' '+type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ================================================================
+   MQTT LAYER
+   ================================================================ */
+const conns = new Map();
+const online = new Map();
+online.set(UID, Date.now());
+
+function loadScript(list, i){
+  i = i||0;
+  return new Promise((res,rej)=>{
+    if (i >= list.length) return rej(new Error('cdn'));
+    const s = document.createElement('script');
+    s.src = list[i];
+    s.onload = res;
+    s.onerror = () => loadScript(list, i+1).then(res, rej);
+    document.head.appendChild(s);
+  });
+}
+function readyCount(){ let n=0; conns.forEach(e=>{if(e.ready)n++}); return n; }
+
+function updateStatus(){
+  const el = $('status'), txt = $('statusTxt');
+  if (readyCount() > 0) {
+    el.classList.remove('offline'); el.classList.add('online');
+    txt.textContent = online.size + ' آنلاین';
+  } else {
+    el.classList.add('offline'); el.classList.remove('online');
+    txt.textContent = 'آفلاین';
+  }
+}
+
+function connectBroker(url){
+  if (conns.has(url) || typeof mqtt === 'undefined') return;
+  let client;
+  try {
+    client = mqtt.connect(url, {
+      clientId: 'm4_'+UID+'_'+Math.random().toString(36).slice(2,7),
+      protocolVersion: 4, clean: true,
+      connectTimeout: 9000, reconnectPeriod: 4500, keepalive: 30
+    });
+  } catch(e){ return; }
+  const entry = { url, client, ready:false };
+  conns.set(url, entry);
+
+  client.on('connect', () => {
+    entry.ready = true;
+    try {
+      client.subscribe([T_ADMINS, T_POWER, T_PRESENCE+'/+'], {qos: 1});
+    } catch(_){}
+    publishPresence();
+    // Republish state to this broker (bulletproof propagation)
+    setTimeout(() => {
+      if (isSuper() && adminsTs > 0) {
+        const p = JSON.stringify({ admins: [...adminList], ts: adminsTs, from: UID });
+        try { client.publish(T_ADMINS, p, {qos: 1, retain: true}); } catch(_){}
+      }
+      if (powerOwner === UID && powerTs > 0) {
+        const p = JSON.stringify({ on: shopOn, ts: powerTs, uid: UID });
+        try { client.publish(T_POWER, p, {qos: 1, retain: true}); } catch(_){}
+      }
+    }, 400);
+    updateStatus();
+  });
+  client.on('close',  ()=>{ entry.ready=false; updateStatus(); });
+  client.on('error',  ()=>{ entry.ready=false; updateStatus(); });
+  client.on('offline',()=>{ entry.ready=false; updateStatus(); });
+  client.on('message', (topic, payload)=>{
+    let txt; try { txt = payload.toString(); } catch(_){ return; }
+    onMessage(topic, txt);
+  });
+}
+
+function onMessage(topic, txt){
+  let data;
+  try { data = JSON.parse(txt); } catch(_){ return; }
+
+  if (topic === T_ADMINS) {
+    const ts = data.ts || 0;
+    if (ts >= adminsTs) {
+      const wasAdmin = isAdmin();
+      adminsTs = ts;
+      adminList = new Set(data.admins || []);
+      adminList.add(SUPER_ADMIN);
+      const nowAdmin = isAdmin();
+      if (!wasAdmin && nowAdmin && !isSuper()) {
+        showToast('👑 شما مدیر شدید!', 'good');
+      } else if (wasAdmin && !nowAdmin && !isSuper()) {
+        showToast('شما از مدیریت حذف شدید', 'bad');
+      }
+      updateAdminUI();
+      updateAdminListUI();
+    }
+    return;
+  }
+
+  if (topic === T_POWER) {
+    const ts = data.ts || 0;
+    if (ts >= powerTs) {
+      powerTs = ts;
+      powerOwner = data.uid || '';
+      shopOn = !!data.on;
+      updatePowerUI();
+      updateShopUI();
+    }
+    return;
+  }
+
+  if (topic.startsWith(T_PRESENCE+'/')) {
+    const from = topic.slice(T_PRESENCE.length+1);
+    if (!from || from.length > 8) return;
+    online.set(from, Date.now());
+    updateStatus();
+  }
+}
+
+function publishPresence(){
+  const p = JSON.stringify({ uid: UID, ts: Date.now() });
+  conns.forEach(e=>{
+    if (!e.ready) return;
+    try { e.client.publish(T_PRESENCE+'/'+UID, p, {qos:0}); } catch(_){}
+  });
+}
+
+function publishAdmins(){
+  if (!isSuper()) return;
+  adminsTs = Date.now();
+  const p = JSON.stringify({ admins: [...adminList], ts: adminsTs, from: UID });
+  conns.forEach(e=>{
+    if (!e.ready) return;
+    try { e.client.publish(T_ADMINS, p, {qos: 1, retain: true}); } catch(_){}
+  });
+}
+
+function publishPower(){
+  if (!isAdmin()) return;
+  powerTs = Date.now();
+  powerOwner = UID;
+  const p = JSON.stringify({ on: shopOn, ts: powerTs, uid: UID });
+  conns.forEach(e=>{
+    if (!e.ready) return;
+    try { e.client.publish(T_POWER, p, {qos: 1, retain: true}); } catch(_){}
+  });
+}
+
+/* Heartbeat */
+setInterval(()=>{
+  publishPresence();
+  const t = Date.now();
+  online.forEach((ts,id)=>{ if (id !== UID && t-ts > STALE_MS) online.delete(id); });
+  updateStatus();
+}, HEART_MS);
+
+/* Periodic republish — bulletproof sync */
+setInterval(()=>{
+  if (readyCount() === 0) return;
+  if (isSuper()) publishAdmins();
+  if (powerOwner === UID && isAdmin()) publishPower();
+}, REPUBLISH_MS);
+
+/* Periodic UI poll — fixes any stale UI */
+setInterval(()=>{
+  updateAdminUI();
+  updatePowerUI();
+  updateShopUI();
+}, UI_POLL_MS);
+
+/* Boot */
+loadScript(MQ_SRC)
+  .then(()=>{ BRK.forEach((url,i)=>setTimeout(()=>connectBroker(url), i*350)); })
+  .catch(()=>{ $('status').classList.add('offline'); $('statusTxt').textContent='آفلاین'; });
+
+window.addEventListener('beforeunload', ()=>{
+  conns.forEach(e=>{
+    if (!e.ready) return;
+    try { e.client.publish(T_PRESENCE+'/'+UID,
+      JSON.stringify({ uid:UID, gone:1, ts:Date.now() }), {qos:0}); } catch(_){}
+  });
+});
+
+/* ================================================================
+   ADMIN UI
+   ================================================================ */
+function updateAdminUI(){
+  const admin = isAdmin();
+  const superA = isSuper();
+  $('powerSlot').style.display = admin ? 'flex' : 'none';
+  $('adminBtn').style.display  = superA ? 'flex' : 'none';
+  $('adminBadge').classList.toggle('show', admin && !superA);
+}
+
+function updateAdminListUI(){
+  const arr = [...adminList];
+  const list = $('adminList');
+  list.innerHTML = arr.map(a=>`
+    <div class="admin-item">
+      <span>${esc(a)}${a===SUPER_ADMIN?' 👑':''}</span>
+      ${a!==SUPER_ADMIN && isSuper()
+        ? `<button class="remove-admin" data-id="${esc(a)}">حذف</button>`
+        : ''}
+    </div>`).join('');
+  list.querySelectorAll('.remove-admin').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.id;
+      adminList.delete(id);
+      publishAdmins();
+      updateAdminListUI();
+      showToast(id + ' از مدیریت حذف شد', 'good');
+    });
+  });
+}
+
+$('adminAddBtn').addEventListener('click', ()=>{
+  if (!isSuper()) return;
+  const val = $('adminIdInput').value.trim().toUpperCase();
+  if (!/^[A-Z0-9]{4}$/.test(val)) {
+    showToast('شناسه باید ۴ کاراکتر انگلیسی یا عدد باشد', 'bad');
+    return;
+  }
+  if (val === SUPER_ADMIN) { showToast('U8ER خودش مدیر کل است', 'bad'); return; }
+  if (adminList.has(val)) { showToast('این شناسه از قبل مدیر است', 'bad'); return; }
+  adminList.add(val);
+  publishAdmins();
+  updateAdminListUI();
+  $('adminIdInput').value = '';
+  showToast(val + ' مدیر شد ✅', 'good');
+});
+
+$('adminIdInput').addEventListener('keydown', e=>{
+  if (e.key === 'Enter') $('adminAddBtn').click();
+});
+
+$('adminBtn').addEventListener('click', ()=>{
+  updateAdminListUI();
+  $('adminModal').classList.add('show');
+});
+$('adminModalClose').addEventListener('click', ()=> $('adminModal').classList.remove('show'));
+$('adminModal').addEventListener('click', e=>{ if (e.target===$('adminModal')) $('adminModal').classList.remove('show'); });
+
+/* ================================================================
+   POWER TOGGLE
+   ================================================================ */
+function updatePowerUI(){
+  const t = $('powerToggle');
+  if (!t) return;
+  t.classList.toggle('on', shopOn);
+  t.classList.toggle('off', !shopOn);
+}
+
+$('powerToggle').addEventListener('click', ()=>{
+  if (!isAdmin()) return;
+  shopOn = !shopOn;
+  publishPower();
+  updatePowerUI();
+  updateShopUI();
+  showToast(shopOn ? '🟢 شاپ روشن شد' : '🔴 شاپ خاموش شد', shopOn ? 'good' : 'bad');
+});
+
+function updateShopUI(){
+  $('buyBtn').classList.toggle('closed', !shopOn);
+}
+
+/* ================================================================
+   SLIDER
+   ================================================================ */
+const slider = $('slider');
+const fill = $('fill');
+const balls = Array.from(slider.querySelectorAll('.ball'));
+let dragging = false;
+
+function setAmount(val){
+  selectedAmount = val;
+  const idx = AMOUNTS.indexOf(val);
+  if (idx === -1) return;
+  const W = slider.offsetWidth - 16;
+  const pos = [0, 0.25, 0.5, 0.75, 1][idx];
+  fill.style.width = (pos * W) + 'px';
+  balls.forEach((b,i)=>{
+    b.classList.toggle('active', i === idx);
+    b.classList.toggle('filled', i <= idx);
+  });
+  const total = val * 200;
+  const el = $('totalPrice');
+  el.textContent = persianNum(total);
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+}
+function updateFromPointer(e){
+  const rect = slider.getBoundingClientRect();
+  const x = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+  const pct = x / rect.width;
+  const idx = Math.max(0, Math.min(4, Math.round(pct * 4)));
+  setAmount(AMOUNTS[idx]);
+}
+slider.addEventListener('pointerdown', e=>{
+  slider.setPointerCapture(e.pointerId);
+  dragging = true;
+  updateFromPointer(e);
+});
+slider.addEventListener('pointermove', e=>{ if (dragging) updateFromPointer(e); });
+function endDrag(e){
+  dragging = false;
+  if (e && e.pointerId != null) {
+    try { if (slider.hasPointerCapture(e.pointerId)) slider.releasePointerCapture(e.pointerId); } catch(_){}
+  }
+}
+slider.addEventListener('pointerup', endDrag);
+slider.addEventListener('pointercancel', endDrag);
+window.addEventListener('resize', ()=>{ if (selectedAmount) setAmount(selectedAmount); });
+
+/* ================================================================
+   BUY
+   ================================================================ */
+$('buyBtn').addEventListener('click', ()=>{
+  if (!shopOn) { showToast('شاپ بسته است ❌', 'bad'); return; }
+  if (!selectedAmount) { showToast('اول یک مبلغ را انتخاب کنید', 'bad'); return; }
+  const price = selectedAmount * 200;
+  $('payAmount').textContent = persianNum(price) + ' تومان';
+  $('payModal').classList.add('show');
+});
+$('payModalClose').addEventListener('click', ()=> $('payModal').classList.remove('show'));
+$('payModalOk').addEventListener('click', ()=> $('payModal').classList.remove('show'));
+$('payModal').addEventListener('click', e=>{ if (e.target===$('payModal')) $('payModal').classList.remove('show'); });
+
+/* ================================================================
+   COPY UID
+   ================================================================ */
+$('copyBtn').addEventListener('click', ()=>{
+  navigator.clipboard.writeText(UID).then(()=>{
+    const b = $('copyBtn');
+    b.textContent = '✓';
+    b.classList.add('copied');
+    showToast('شناسه کپی شد: ' + UID, 'good');
+    setTimeout(()=>{ b.textContent = '📋'; b.classList.remove('copied'); }, 1800);
+  }).catch(()=>{
+    prompt('شناسه‌ات:', UID);
+  });
+});
+
+/* Escape */
+document.addEventListener('keydown', e=>{
+  if (e.key === 'Escape') {
+    $('payModal').classList.remove('show');
+    $('adminModal').classList.remove('show');
+  }
+});
+
+/* ================================================================
+   BACKGROUND PARTICLES (performant)
+   ================================================================ */
+(function(){
+  const canvas = $('bg-canvas');
+  const ctx = canvas.getContext('2d', { alpha: true });
+  let w = 0, h = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const particles = [];
+  const COLORS = ['0,212,255', '168,85,247', '255,184,0'];
+
+  function resize(){
+    w = window.innerWidth; h = window.innerHeight;
+    canvas.width = w * dpr; canvas.height = h * dpr;
+    canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function init(){
+    particles.length = 0;
+    const count = w < 768 ? 25 : 45;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 2.2 + 0.6,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        alpha: Math.random() * 0.45 + 0.15,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        pulse: Math.random() * Math.PI * 2
+      });
+    }
+  }
+  let last = 0;
+  function loop(t){
+    if (t - last < 33) { requestAnimationFrame(loop); return; } // ~30fps cap
+    last = t;
+    ctx.clearRect(0, 0, w, h);
+    for (const p of particles) {
+      p.x += p.vx; p.y += p.vy;
+      p.pulse += 0.02;
+      if (p.x < -10) p.x = w + 10; else if (p.x > w + 10) p.x = -10;
+      if (p.y < -10) p.y = h + 10; else if (p.y > h + 10) p.y = -10;
+      const a = p.alpha * (0.7 + Math.sin(p.pulse) * 0.3);
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(' + p.color + ',' + a + ')';
+      ctx.fill();
+    }
+    requestAnimationFrame(loop);
+  }
+  resize(); init();
+  window.addEventListener('resize', ()=>{ resize(); init(); }, {passive: true});
+  requestAnimationFrame(loop);
+})();
+
+/* ================================================================
+   BOOT
+   ================================================================ */
+updateAdminUI();
+updatePowerUI();
+updateShopUI();
+updateStatus();
+</script>
+</body>
+</html>
